@@ -124,4 +124,4 @@ def triangle (bp, start, speed=5):
 
 	pedestrian.destroy()
 
-triangle(random_walker_bp, initial)
+triangle(random_walker_bp, initial, 10)
