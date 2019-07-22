@@ -59,7 +59,7 @@ def triangle (bp, start, speed=5):
 
 	pedestrian = world.spawn_actor(bp, start)
 	 
-	# make first line of triangle
+	# make first line of triangle 
 
 	line1 = 2
 
@@ -79,7 +79,7 @@ def triangle (bp, start, speed=5):
 	control.speed = 0
 	pedestrian.apply_control(control)
 
-	# make second line of triangle
+	# make second line of triangle 
 
 	line2 = 2
 
@@ -99,7 +99,7 @@ def triangle (bp, start, speed=5):
 	control.speed = 0
 	pedestrian.apply_control(control)
 
-	# make third line of triangle
+	# make third line of triangle 
 	
 	line3 = 1
 
