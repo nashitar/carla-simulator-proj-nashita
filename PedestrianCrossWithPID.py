@@ -55,8 +55,6 @@ rot = librarycarla.Rotation
 recommended_spawn_points = world.get_map().get_spawn_points() # spawn points from carla
 spawn_sidewalk_corner = recommended_spawn_points[1] # used to set rotation class before location is changed
 spawn_sidewalk_corner.location = loc(x = 170.12558, y=76.188217, z=1.1)
-# cross street loc: loc(x=175.29485, y=75.488579, z=0.91) 
-# default: loc(x=190.3622, y=71.4094, z=1)
 
 # define spawn destination
 
@@ -76,59 +74,39 @@ pedestrian = world.spawn_actor(random_walker_bp, spawn_sidewalk_corner)
 
 def spawn (pedestrian, initial, sp, seconds=5, speed=1):
 
-	pid = PID(3, 0.01, 0.1, setpoint=sp)
+	# set initial values for pid controller and create variable that will 
+	# track the location of the pedestrian throughout its path
 
+	pid = PID(3, 0.01, 0.1, setpoint=sp)
 	current = initial.location
 
-	# values assigned to control.direction.* need to be between -1 and 1
-
-	x = sp.location.x - current.x 
-	y = sp.location.y - current.y
-
-	if (abs(x) >= abs(y)):
-		if (abs(x) >= 0 and abs(x) < 1):
-			x_for_det_angle = x/1
-			y_for_det_angle = y/1
-		elif (abs(x) >= 1 and abs(x) < 10):
-			x_for_det_angle = x/10
-			y_for_det_angle = y/10
-		elif (abs(x) >= 10 and abs(x) < 100):
-			x_for_det_angle = x/100
-			y_for_det_angle = y/100
-		elif (abs(x) >= 10 and abs(x) < 100):
-			x_for_det_angle = x/1000
-			y_for_det_angle = y/1000
-		else:
-			print (":(")
-	else:
-		if (abs(y) >= 0 and abs(y) < 1):
-			y_for_det_angle = y/1
-			x_for_det_angle = x/1
-		elif (abs(y) >= 1 and abs(y) < 10):
-			y_for_det_angle = y/10
-			x_for_det_angle = x/10
-		elif (abs(y) >= 10 and abs(y) < 100):
-			y_for_det_angle = y/100
-			x_for_det_angle = x/100
-		elif (abs(y) >= 10 and abs(y) < 100):
-			y_for_det_angle = y/1000
-			x_for_det_angle = x/1000
-		else:
-			print (":(")
+	# make sure method to find inital angle does not result in out of bounds 
+	# error and find initial angle
 
 	if (((initial.location.y/initial.location.x) > 1) or ((initial.location.y/initial.location.x) < -1)):
 		initial_angle = math.acos(initial.location.x/initial.location.y)
 	else:
 		initial_angle = math.asin(initial.location.y/initial.location.x)	
 
-	# tell the pedestrian to move for the requested number of seconds
+	# tell the pedestrian to move for the requested number of seconds 
+	# or until the destination is reached
 
 	while seconds >= 0: 
-		control = carla.WalkerControl()
 
+		# create control variable in order to track and control 
+		# pedestrain movement and set basic values
+
+		control = carla.WalkerControl()
 		control.speed = speed # speed is defined in m/s
 
-		current = pedestrian.get_location()
+		# set value of pedestrain location in order to avoid null error
+
+		null_loc = loc(x=0, y=0, z=0)
+
+		if (pedestrian.get_location() != null_loc):
+			current = pedestrian.get_location()
+		else:
+			current = initial.location
 
 		# values assigned to control.direction.* need to be between -1 and 1
 
@@ -136,44 +114,49 @@ def spawn (pedestrian, initial, sp, seconds=5, speed=1):
 		y = sp.location.y - current.y
 
 		if (abs(x) >= abs(y)):
-			if (abs(x) >= 0 and abs(x) < 1):
-				x_for_det_angle = x/1
-				y_for_det_angle = y/1
-			elif (abs(x) >= 1 and abs(x) < 10):
-				x_for_det_angle = x/10
-				y_for_det_angle = y/10
+			if (abs(x) >= 1 and abs(x) < 10):
+				x = x/10
+				y = y/10
 			elif (abs(x) >= 10 and abs(x) < 100):
-				x_for_det_angle = x/100
-				y_for_det_angle = y/100
+				x = x/100
+				y = y/100
 			elif (abs(x) >= 10 and abs(x) < 100):
-				x_for_det_angle = x/1000
-				y_for_det_angle = y/1000
+				x = x/1000
+				y = y/1000
 		else:
-			if (abs(y) >= 0 and abs(y) < 1):
-				y_for_det_angle = y/1
-				x_for_det_angle = x/1
-			elif (abs(y) >= 1 and abs(y) < 10):
-				y_for_det_angle = y/10
-				x_for_det_angle = x/10
+			if (abs(y) >= 1 and abs(y) < 10):
+				y = y/10
+				x = x/10
 			elif (abs(y) >= 10 and abs(y) < 100):
-				y_for_det_angle = y/100
-				x_for_det_angle = x/100
+				y = y/100
+				x = x/100
 			elif (abs(y) >= 10 and abs(y) < 100):
-				y_for_det_angle = y/1000
-				x_for_det_angle = x/1000
+				y = y/1000
+				x = x/1000
 
-		control.direction.y = y_for_det_angle
-		control.direction.x = x_for_det_angle
+		# set pedestrian direction
+
+		control.direction.y = y
+		control.direction.x = x
+
+		# apply the values set to the control variable to the pedestrian
 
 		pedestrian.apply_control(control)
 		time.sleep(1.0)
+
+		# make sure method to find set point angle does not result in  
+		# out of bounds error and find set point angle
 
 		if (((control.direction.y/control.direction.x) > 1) or ((control.direction.y/control.direction.x) < -1)):
 			sp_angle = math.acos(control.direction.x/control.direction.y)
 		else:
 			sp_angle = math.asin(control.direction.y/control.direction.x)
 
+		# calculate angle error
+
 		angle_error = initial_angle - sp_angle
+
+		# find norm
 
 		sp_as_vector = [sp.location.x, sp.location.y, sp.location.z]
 		p_as_vector = [current.x, current.y, current.z]
@@ -185,11 +168,16 @@ def spawn (pedestrian, initial, sp, seconds=5, speed=1):
 		
 		L_error = la.norm( calculate_norm )
 
+		# use PID to update value of angle and L
+
 		angle_update = PID(angle_error)
 		L_update = PID(L_error)
-		#speed = L_update
+
+		# update the seconds
 
 		seconds -= 0.2
+
+		# if location is reached, stop running the loop
 
 		if (abs(sp.location.x - pedestrian.get_location().x) <= 0.3):
 			if (abs(sp.location.y - pedestrian.get_location().y) <= 0.3):
@@ -200,6 +188,15 @@ def spawn (pedestrian, initial, sp, seconds=5, speed=1):
 	control.speed = 0
 	pedestrian.apply_control(control)
 
-spawn (pedestrian, spawn_sidewalk_corner, set_point, 4, 5)
+# run the method
+
+spawn (pedestrian, spawn_sidewalk_corner, set_point)
+
+set_point_2 = recommended_spawn_points[0] # used to set rotation class before location is changed
+set_point_2.location = loc(x=173.13466, y=85.964157, z=0.91)
+
+spawn (pedestrian, set_point, set_point_2)
+
+# destroy the pedestrian once complete
 
 pedestrian.destroy()
