@@ -51,10 +51,6 @@ loc = librarycarla.Location
 weather = carla.WeatherParameters(cloudyness=0.0,precipitation=0.0,sun_altitude_angle=90.0)
 world.set_weather(weather)
 
-# create list to contain values that will later be plotted
-
-plot_values = []
-
 class Pedestrian:
 
 	def __init__ (self, location):
@@ -64,6 +60,12 @@ class Pedestrian:
 		recommended_spawn_points = world.get_map().get_spawn_points() # spawn points from carla
 		spawn_point = recommended_spawn_points[1] # used to set rotation class before location is changed
 		spawn_point.location = location
+
+		# create lists to contain values that will later be plotted
+
+		self.plot_values = []
+		self.control_input = []
+		self.control_output = []
 
 		# randomly define blueprint for pedestrian
 
@@ -80,7 +82,7 @@ class Pedestrian:
 		# variable in order to track and control pedestrain movement 
 		# and set basic value for speed 
 
-		pid = PID(Kd=0.01, Ki=0.01, setpoint=0, output_limits=(-.4, .4))
+		pid = PID(Kd=0.1, Ki=0.01, setpoint=0, output_limits=(-0.8, 0.8))
 		control = carla.WalkerControl()
 		control.speed = speed # speed is defined in m/s
 		
@@ -136,7 +138,17 @@ class Pedestrian:
 			if la.norm([final.x-location.x,final.y-location.y]) <= tolerance:
 				break
 
-			plot_values.append(math.sqrt(math.pow(H.real,2) + math.pow(H.imag,2)))
+			# add the pedestrian's current location to a list 
+			# so that it can later be plotted
+
+			self.plot_values.append(self.pedestrian.get_location())
+			
+			# if the pedestrian is not moving and/or moving abnormally 
+			# slow, move it up in case the reason for the lack of speed 
+			# is that the pedestrian needs to get on the sidewalk
+
+			if (math.sqrt(math.pow(velocity.x,2)+math.pow(velocity.y,2))) < 0.4:
+				self.pedestrian.set_location(loc(self.pedestrian.get_location().x, y=self.pedestrian.get_location().y, z=1.2))
 
 			# ************************************************
 			# compute
@@ -145,6 +157,12 @@ class Pedestrian:
 			# pid controller for angle update
 
 			theta_control = pid(theta_error)	
+
+			# record the control input and the control output so
+			# that the data can later be graphed to compare them
+
+			self.control_input.append(theta_error)
+			self.control_output.append(theta_control)
 
 			# ************************************************
 			# actuate
@@ -185,10 +203,20 @@ class Pedestrian:
 
 	# tell pedestrian to use a set of points as waypoints and follow a path
 	
-	def _follow_path (self, coordinates, tolerance=1, speed=1):
+	def _follow_path (self, coordinates, tolerance=1, speed=[1]):
 
-		for i in range((len(coordinates))-1):
-			self._go_to_location(coordinates[i+1], tolerance, speed)
+		list_of_speeds = [speed[0] for _ in range((len(coordinates))-1)]
+
+		if (len(speed) == 1):
+			for i in range((len(coordinates))-1):
+				list_of_speeds.append(speed[0])
+		elif (len(coordinates) - len(speed)) == 1:
+			list_of_speeds = speed
+		else:
+			for i in range((len(coordinates))-1):
+				list_of_speeds.append(speed[0])
+		for i in range(1, (len(coordinates))-1):
+			self._go_to_location(coordinates[i+1], tolerance, list_of_speeds[i])
 
 	# handle SIGINT so pedestrian is destroyed when crtl+c is pressed
 
@@ -196,21 +224,3 @@ class Pedestrian:
 		self.pedestrian.destroy()
 		sys.exit(0)
 
-# test
-
-coordinates = [loc(x = 170.12558, y=76.188217, z=1.1), loc(x=163.13466, y=65.964157, z=0.91), loc(x=173.13466, y=85.964157, z=0.91), loc(x=173.13466, y=65.964157, z=0.91)]
-pedestrian = Pedestrian(coordinates[1])
-
-signal.signal(signal.SIGINT, pedestrian.signal_handler)
-
-pedestrian._go_to_location(coordinates[2], 1, 3)
-pedestrian._go_to_location(coordinates[1], 1, 3)
-
-pedestrian.destroy()
- 
-# plot velocity
-
-plot.plot(plot_values)
-plot.ylabel('velocity in meters per second')	
-plot.xlabel('time')
-plot.show()
