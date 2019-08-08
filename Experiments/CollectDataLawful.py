@@ -4,8 +4,9 @@ import glob
 import os
 import sys
 import time
+from ..Configuration import carla_path
 
-sys.path.append('/home/nashita/UnrealEngine_4.22/carla/Dist/CARLA_0.9.5-428-g0ce908d-dirty/LinuxNoEditor/PythonAPI/carla/dist/carla-0.9.5-py3.5-linux-x86_64.egg')
+sys.path.append(carla_path)
 
 import carla
 import signal
@@ -14,13 +15,8 @@ import math
 import numpy as np
 from numpy import linalg as la
 import matplotlib.pyplot as plot
-from Pedestrian import Pedestrian
-from CrosswalkPedestrian import CrosswalkPedestrian
-from LawfulCrosswalkPedestrian import LawfulCrosswalkPedestrian
-from Jaywalkers import Jaywalkers
-from Hurried import Hurried
 
-sys.path.append('/home/nashita/Downloads/simple_pid/simple_pid/PID.py')
+from ..Source.LawfulCrosswalkPedestrian import LawfulCrosswalkPedestrian
 
 from simple_pid import PID
 

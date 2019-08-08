@@ -1,6 +1,8 @@
 # carla-simulator-proj-nashita
 ***
 
+***Change the path in carla_path in the Configuration.py files in Utilities, Source, and Experiments***
+
 ## **Utilities**
 
 The utility files are used to find information that can be used for experiments.

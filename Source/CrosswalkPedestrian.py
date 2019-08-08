@@ -4,8 +4,9 @@ import glob
 import os
 import sys
 import time
+from ..Configuration import carla_path
 
-sys.path.append('/home/nashita/UnrealEngine_4.22/carla/Dist/CARLA_0.9.5-428-g0ce908d-dirty/LinuxNoEditor/PythonAPI/carla/dist/carla-0.9.5-py3.5-linux-x86_64.egg')
+sys.path.append(carla_path)
 
 import carla
 import signal
@@ -14,10 +15,8 @@ import math
 import numpy as np
 from numpy import linalg as la
 import matplotlib.pyplot as plot
-from Pedestrian import Pedestrian
+from .Pedestrian import Pedestrian
 import scipy.stats as stats
-
-sys.path.append('/home/nashita/Downloads/simple_pid/simple_pid/PID.py')
 
 from simple_pid import PID
 
@@ -58,8 +57,6 @@ class CrosswalkPedestrian(Pedestrian):
 	def __init__(self, location):
 
 		super(CrosswalkPedestrian, self).__init__(location)
-
-	# ***** crosswalk 1 *****
 	
 	# select spawn point along crosswalk
 
@@ -171,7 +168,7 @@ class CrosswalkPedestrian(Pedestrian):
 		point.location = random.choice(list_of_coordinates)
 		return point.location
 
-	# method to select between one and three
+	# method to select between two and four
 	# locations along the path with some measure
 	# of randomness
 
