@@ -1,8 +1,5 @@
-Markdown==3.1.1
 matplotlib==1.5.1
 numpy==1.14.5
-nvidia-ml-py==7.352.0
 pygame==1.9.6
-PyOpenGL==3.0.2
 scipy==0.17.0
 simple-pid==0.2.2
