@@ -16,8 +16,8 @@ from numpy import linalg as la
 import matplotlib.pyplot as plot
 from Pedestrian import Pedestrian
 from CrosswalkPedestrian import CrosswalkPedestrian
-from Lawful import Lawful
-from JaywalkingCrosswalkPedestrian import JaywalkingCrosswalkPedestrian
+from LawfulCrosswalkPedestrian import LawfulCrosswalkPedestrian
+from Jaywalkers import Jaywalkers
 from Hurried import Hurried
 
 sys.path.append('/home/nashita/Downloads/simple_pid/simple_pid/PID.py')
@@ -58,8 +58,8 @@ world.set_weather(weather)
 
 # test
 
-x = open('x_jay.txt', 'a')
-y = open('y_jay.txt', 'a')
+x = open('x_law.txt', 'a')
+y = open('y_law.txt', 'a')
 
 inputs = open('inputs.txt', 'w')
 outputs = open ('outputs.txt', 'w')
@@ -67,12 +67,12 @@ outputs = open ('outputs.txt', 'w')
 try:
 	for i in range(100):
 
-		coordinates = JaywalkingCrosswalkPedestrian.path(177.5, 180, 158, 161, 74, 76.5, 74, 76.5) # (151.099, 153.85, 151.099, 153.85, 54.076, 67.722, 54.076, 67.722)
-		pedestrian = JaywalkingCrosswalkPedestrian(coordinates[0])
+		coordinates = LawfulCrosswalkPedestrian.path(177.5, 180, 158, 161, 74, 76.5, 74, 76.5)
+		pedestrian = LawfulCrosswalkPedestrian(coordinates[0])
 
 		signal.signal(signal.SIGINT, pedestrian.signal_handler)
 
-		pedestrian._follow_path(coordinates, 0.5, [2])
+		pedestrian._follow_path(coordinates, 0.5, [1.0])
 
 		######################################
 		# grapth the path of the pedestrian
@@ -81,11 +81,14 @@ try:
 		coordinates = pedestrian.plot_values
 
 		for coordinate in coordinates:
-			if (coordinate.x != 0.0 and coordinate.y != 0.0 and abs(coordinate.x) > 0.0 and coordinate.y < 85 and 1and abs(coordinate.y) > 0.0):
+			if (coordinate.x != 0.0 and coordinate.y != 0.0 and abs(coordinate.x) > 0.0 and abs(coordinate.y) > 0.0):
 				x.write(str(coordinate.x))
 				x.write('\n')
 				y.write(str(coordinate.y))
 				y.write('\n')
+		
+		x.write('\n')
+		y.write('\n')
 
 		################################################
 		# graph the control input vs. the control output
