@@ -1,7 +1,7 @@
 # carla-simulator-proj-nashita
 ***
 
-***Change the path in carla_path in the Configuration.py files in Utilities, Source, and Experiments***
+***Change the path in carla_path in Configuration.py***
 
 ## **Utilities**
 
