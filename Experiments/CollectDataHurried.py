@@ -47,11 +47,6 @@ librarycarla = carla.libcarla
 world = client.get_world()
 loc = librarycarla.Location
 
-# set weather in simulation to sunny so the pedestrian is easier to see
-
-weather = carla.WeatherParameters(cloudyness=0.0,precipitation=0.0,sun_altitude_angle=90.0)
-world.set_weather(weather)
-
 # test
 
 x = open('x_hurr.txt', 'a')
