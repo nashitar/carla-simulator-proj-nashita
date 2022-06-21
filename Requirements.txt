@@ -1,5 +1,5 @@
 matplotlib==1.5.1 
-numpy==1.14.5
+numpy==1.22.0
 pygame==1.9.6
 scipy==0.17.0
 simple-pid==0.2.2
